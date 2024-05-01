@@ -37,12 +37,19 @@ import { v4 as uuidv4 } from 'uuid';
 import CloseCircleOutlined from '@ant-design/icons-vue/lib/icons/CloseCircleOutlined';
 import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
+import moment from 'moment';
 
 const field = ref('');
 const store = useTodoStore();
 
 function createTodo(text: string) {
-  return { text, id: uuidv4(), done: false, important: false };
+  return { 
+    text: text, 
+    id: uuidv4(), 
+    done: false, 
+    important: false, 
+    date: moment(new Date()).format('YYYY-MM-DD')
+  };
 }
 
 function handleAddTodo() {
