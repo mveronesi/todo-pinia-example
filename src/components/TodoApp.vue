@@ -1,10 +1,13 @@
 <template>
-  <Input
-    v-model:value="field"
-    class="input"
-    @keyup.enter="handleAddTodo"
-    placeholder="Type name of todo"
-  />
+  <div class="input-container">
+    <Input
+      v-model:value="field"
+      class="input"
+      placeholder="Type name of todo"
+    />
+    <DatePicker class="input" placeholder="Select date" @update:value="date = $event" />
+    <Button type="primary" @click="handleAddTodo">Add Todo</Button>
+  </div>
 
   <Typography>Done: {{ store.doneTodosCount }}</Typography>
   <Typography>Important: {{ store.importantTodosCount }}</Typography>
@@ -23,6 +26,7 @@
         <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
           item.text
         }}</Typography>
+        <Typography class="todo-date">{{ item.date }}</Typography>
         <CloseCircleOutlined @click="store.removeTodo(item.id)"
       /></ListItem>
     </template>
@@ -30,38 +34,44 @@
 </template>
 
 <script setup lang="ts">
-import { Input, List, ListItem, Typography } from 'ant-design-vue';
+import { Input, List, ListItem, Typography, DatePicker, Button } from 'ant-design-vue';
 import { ref } from 'vue';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { useTodoStore } from '@/stores/todo';
 import { v4 as uuidv4 } from 'uuid';
 import CloseCircleOutlined from '@ant-design/icons-vue/lib/icons/CloseCircleOutlined';
 import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
-import moment from 'moment';
 
 const field = ref('');
+const date = ref<Dayjs | null>(null);
 const store = useTodoStore();
 
-function createTodo(text: string) {
+function createTodo(text: string, date: string) {
   return { 
     text: text, 
     id: uuidv4(), 
     done: false, 
     important: false, 
-    date: moment(new Date()).format('YYYY-MM-DD')
+    date: date
   };
 }
 
 function handleAddTodo() {
-  const todo = createTodo(field.value);
+  const formattedDate = date.value ? date.value.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD');
+  const todo = createTodo(field.value, formattedDate);
   store.addTodo(todo);
 
   field.value = '';
+  date.value = null;
 }
 </script>
 
 <style scoped>
-.input {
+.input-container {
+  display: flex;
+  gap: 10px;
   margin: 15px 0;
 }
 .icon {
