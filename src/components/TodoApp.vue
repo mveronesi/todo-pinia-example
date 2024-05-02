@@ -7,12 +7,12 @@
       @keyup.enter="handleAddTodo"
     />
     <DatePicker 
-        class="input date-picker" 
-        :class="{'error-input': dateError}"
-        placeholder="Select date" 
-        v-model:value="date"
-        @update:value="date = $event" 
-        ref="datePicker" 
+      class="input date-picker" 
+      :class="{'error-input': dateError}"
+      placeholder="Select date" 
+      :value="date"
+      @update:value="handleDateChange" 
+      ref="datePicker" 
     />
     <Button type="primary" @click="handleAddTodo">Add Todo</Button>
   </div>
@@ -37,14 +37,22 @@
           item.text
         }}</Typography>
         <Typography class="todo-date">{{ item.date }}</Typography>
-        <CloseCircleOutlined @click="store.removeTodo(item.id)"
-      /></ListItem>
+        <EditOutlined @click="openEditModal(item)" />
+        <CloseCircleOutlined @click="store.removeTodo(item.id)" />
+      </ListItem>
     </template>
   </List>
+
+  <Modal v-model:visible="isEditModalVisible" title="Edit Todo" @ok="handleEditTodo">
+    <Input v-model:value="editField" placeholder="Type name of todo" />
+    <DatePicker v-model:value="editDate" placeholder="Select date" />
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import { Input, List, ListItem, Typography, DatePicker, Button } from 'ant-design-vue';
+import EditOutlined from '@ant-design/icons-vue/lib/icons/EditOutlined';
+import { Modal } from 'ant-design-vue';
 import { ref, onMounted } from 'vue';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -53,6 +61,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CloseCircleOutlined from '@ant-design/icons-vue/lib/icons/CloseCircleOutlined';
 import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
+import type { ITodo } from '@/interfaces';
 
 const field = ref('');
 const date = ref<Dayjs | null>(dayjs());
@@ -60,6 +69,11 @@ const store = useTodoStore();
 const datePickerRef = ref(null);
 const fieldError = ref('');
 const dateError = ref('');
+const isEditModalVisible = ref(false);
+const editField = ref('');
+const editDate = ref<Dayjs | null>(null);
+let editTodoId: string | null = null;
+
 
 onMounted(store.fetchTodos);
 
@@ -93,6 +107,30 @@ function handleAddTodo() {
   datePickerRef.value?.clear()
   fieldError.value = '';
   dateError.value = '';
+}
+
+function openEditModal(todo: ITodo) {
+  editTodoId = todo.id;
+  editField.value = todo.text;
+  editDate.value = dayjs(todo.date);
+  isEditModalVisible.value = true;
+}
+
+function handleDateChange(newDate: string | Dayjs) {
+  date.value = newDate;
+}
+
+function handleEditTodo() {
+  if (!editField.value || !editDate.value || !editTodoId) return;
+  const updatedTodo = {
+    text: editField.value,
+    date: editDate.value.format('YYYY-MM-DD'),
+  };
+  store.editTodo(editTodoId, updatedTodo);
+  isEditModalVisible.value = false;
+  editField.value = '';
+  editDate.value = null;
+  editTodoId = null;
 }
 </script>
 

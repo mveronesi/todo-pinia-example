@@ -7,16 +7,18 @@ function toggleProp(prop: 'important' | 'done', id: string, todo: ITodo) {
   return todo.id === id ? { ...todo, [prop]: !todo[prop] } : todo;
 }
 
+const BASE_URL = 'http://localhost:8000/todos/'
+
 export const useTodoStore = defineStore('todo', () => {
   const todos = ref<ITodo[]>([]);
 
   async function fetchTodos() {
-    const response = await axios.get('http://localhost:8000/todos/');
+    const response = await axios.get(BASE_URL);
     todos.value = response.data;
   }
 
   async function addTodo(todo: ITodo) {
-    const response = await axios.post('http://localhost:8000/todos/', todo);
+    const response = await axios.post(BASE_URL, todo);
     todos.value.push(response.data);
     await fetchTodos();
   }
@@ -25,7 +27,7 @@ export const useTodoStore = defineStore('todo', () => {
     await fetchTodos();
     const todo = todos.value.find((todo: ITodo) => todo.id === id);
     if (!todo) return;
-    await axios.delete(`http://localhost:8000/todos/${id}`);
+    await axios.delete(`${BASE_URL}${id}`);
     await fetchTodos();
   }
 
@@ -33,7 +35,7 @@ export const useTodoStore = defineStore('todo', () => {
     const todo = todos.value.find((todo) => todo.id === id);
     if (todo) {
       todo.done = !todo.done;
-      await axios.put(`http://localhost:8000/todos/`, todo);
+      await axios.put(BASE_URL, todo);
     }
     await fetchTodos();
   }
@@ -42,7 +44,19 @@ export const useTodoStore = defineStore('todo', () => {
     const todo = todos.value.find((todo) => todo.id === id);
     if (todo) {
       todo.important = !todo.important;
-      await axios.put(`http://localhost:8000/todos/`, todo);
+      await axios.put(BASE_URL, todo);
+    }
+    await fetchTodos();
+  }
+
+  async function editTodo(id: string, updatedTodo: Partial<ITodo>) {
+    await fetchTodos();
+    const todoIndex = todos.value.findIndex((todo) => todo.id === id);
+    if (todoIndex !== -1) {
+      const todo = todos.value[todoIndex];
+      const updated = { ...todo, ...updatedTodo };
+      await axios.put(BASE_URL, updated);
+      todos.value[todoIndex] = updated;
     }
     await fetchTodos();
   }
@@ -57,6 +71,7 @@ export const useTodoStore = defineStore('todo', () => {
     removeTodo,
     toggleDone,
     toggleImportant,
+    editTodo,
     doneTodosCount,
     importantTodosCount,
     activeTodosCount,
