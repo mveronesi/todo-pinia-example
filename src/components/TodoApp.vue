@@ -6,7 +6,12 @@
       placeholder="Type name of todo"
       @keyup.enter="handleAddTodo"
     />
-    <DatePicker class="input date-picker" placeholder="Select date" @update:value="date = $event" />
+    <DatePicker 
+      class="input date-picker" 
+      placeholder="Select date" 
+      @update:value="date = $event" 
+      ref="datePicker" 
+    />
     <Button type="primary" @click="handleAddTodo">Add Todo</Button>
   </div>
 
@@ -36,7 +41,7 @@
 
 <script setup lang="ts">
 import { Input, List, ListItem, Typography, DatePicker, Button } from 'ant-design-vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { useTodoStore } from '@/stores/todo';
@@ -48,6 +53,9 @@ import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutl
 const field = ref('');
 const date = ref<Dayjs | null>(null);
 const store = useTodoStore();
+const datePickerRef = ref(null);
+
+onMounted(store.fetchTodos);
 
 function createTodo(text: string, date: string) {
   return { 
@@ -66,6 +74,7 @@ function handleAddTodo() {
 
   field.value = '';
   date.value = null;
+  datePickerRef.value?.clear()
 }
 </script>
 
