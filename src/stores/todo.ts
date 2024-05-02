@@ -22,8 +22,10 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   async function removeTodo(id: string) {
+    await fetchTodos();
+    const todo = todos.value.find((todo: ITodo) => todo.id === id);
+    if (!todo) return;
     await axios.delete(`http://localhost:8000/todos/${id}`);
-    todos.value = todos.value.filter((todo: ITodo) => todo.id !== id);
     await fetchTodos();
   }
 
