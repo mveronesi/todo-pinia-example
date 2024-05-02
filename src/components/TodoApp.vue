@@ -4,8 +4,9 @@
       v-model:value="field"
       class="input"
       placeholder="Type name of todo"
+      @keyup.enter="handleAddTodo"
     />
-    <DatePicker class="input" placeholder="Select date" @update:value="date = $event" />
+    <DatePicker class="input date-picker" placeholder="Select date" @update:value="date = $event" />
     <Button type="primary" @click="handleAddTodo">Add Todo</Button>
   </div>
 
@@ -71,15 +72,35 @@ function handleAddTodo() {
 <style scoped>
 .input-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin: 15px 0;
 }
+
+.input, .date-picker {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .input-container {
+    flex-direction: column;
+  }
+
+  .input, .date-picker {
+    flex: 1 0 100%;
+    min-width: 100%;
+  }
+}
+
 .icon {
   margin-right: 10px;
 }
+
 .line-through {
   text-decoration: line-through;
 }
+
 .text-bold {
   font-weight: 700;
 }
