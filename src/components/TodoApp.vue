@@ -2,18 +2,22 @@
   <div class="input-container">
     <Input
       v-model:value="field"
-      class="input"
+      :class="{'input': true, 'error-input': fieldError}"
       placeholder="Type name of todo"
       @keyup.enter="handleAddTodo"
     />
     <DatePicker 
-      class="input date-picker" 
-      placeholder="Select date" 
-      @update:value="date = $event" 
-      ref="datePicker" 
+        class="input date-picker" 
+        :class="{'error-input': dateError}"
+        placeholder="Select date" 
+        v-model:value="date"
+        @update:value="date = $event" 
+        ref="datePicker" 
     />
     <Button type="primary" @click="handleAddTodo">Add Todo</Button>
   </div>
+  <div v-if="fieldError" class="error">{{ fieldError }}</div>
+  <div v-if="dateError" class="error">{{ dateError }}</div>
 
   <Typography>Done: {{ store.doneTodosCount }}</Typography>
   <Typography>Important: {{ store.importantTodosCount }}</Typography>
@@ -51,9 +55,11 @@ import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
 
 const field = ref('');
-const date = ref<Dayjs | null>(null);
+const date = ref<Dayjs | null>(dayjs());
 const store = useTodoStore();
 const datePickerRef = ref(null);
+const fieldError = ref('');
+const dateError = ref('');
 
 onMounted(store.fetchTodos);
 
@@ -68,13 +74,25 @@ function createTodo(text: string, date: string) {
 }
 
 function handleAddTodo() {
+  let error = false;
+  if (!field.value) {
+    fieldError.value = 'Please enter a todo';
+    error = true;
+  }
+
+  if (!date.value) {
+    dateError.value = 'Please select a date';
+    error = true;
+  }
+  if (error) return;
   const formattedDate = date.value ? date.value.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD');
   const todo = createTodo(field.value, formattedDate);
   store.addTodo(todo);
 
   field.value = '';
-  date.value = null;
   datePickerRef.value?.clear()
+  fieldError.value = '';
+  dateError.value = '';
 }
 </script>
 
@@ -89,6 +107,16 @@ function handleAddTodo() {
 .input, .date-picker {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.error-input {
+  border-color: red;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
 }
 
 @media (max-width: 600px) {
