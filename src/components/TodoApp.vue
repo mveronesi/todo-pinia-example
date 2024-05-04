@@ -2,7 +2,7 @@
   <div class="input-container">
     <Input
       v-model:value="field"
-      :class="{'input': true, 'error-input': fieldError}"
+      :class="{'input-text': true, 'error-input': fieldError}"
       placeholder="Type name of todo"
       @keyup.enter="handleAddTodo"
     />
@@ -19,26 +19,29 @@
   <div v-if="fieldError" class="error">{{ fieldError }}</div>
   <div v-if="dateError" class="error">{{ dateError }}</div>
 
-  <Typography>Done: {{ store.doneTodosCount }}</Typography>
-  <Typography>Important: {{ store.importantTodosCount }}</Typography>
-  <Typography>Active: {{ store.activeTodosCount }}</Typography>
+  <div class="stats-container">
+    <Typography>Active: {{ store.activeTodosCount }}</Typography>
+    <Typography>Done: {{ store.doneTodosCount }}</Typography>
+    <Typography>Important: {{ store.importantTodosCount }}</Typography>
+  </div>
+
   <List bordered :data-source="store.todos">
     <template #renderItem="{ item }">
-      <ListItem>
-        <div>
+      <ListItem class="list-item">
+        <div class="small-cell-left">
           <CheckOutlined class="icon" @click="store.toggleDone(item.id)" title="Toggle done" />
-          <ExclamationOutlined
-            color="red"
-            @click="store.toggleImportant(item.id)"
-            title="Toggle important"
-          />
+          <ExclamationOutlined color="red" @click="store.toggleImportant(item.id)" title="Toggle important" />
         </div>
-        <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
-          item.text
-        }}</Typography>
-        <Typography class="todo-date">{{ item.date }}</Typography>
-        <EditOutlined @click="openEditModal(item)" />
-        <CloseCircleOutlined @click="store.removeTodo(item.id)" />
+        <div class="cell">
+          <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{ item.text }}</Typography>
+        </div>
+        <div class="small-cell-right">
+          <Typography class="todo-date">{{ item.date }}</Typography>
+        </div>
+        <div class="small-cell-right">
+          <EditOutlined @click="openEditModal(item)" class="icon" title="Edit todo"/>
+          <CloseCircleOutlined @click="confirmDelete(item.id)" class="icon" title="Delete todo" />
+        </div>
       </ListItem>
     </template>
   </List>
@@ -132,19 +135,65 @@ function handleEditTodo() {
   editDate.value = null;
   editTodoId = null;
 }
+
+function confirmDelete(id: string) {
+  Modal.confirm({
+    title: 'Confirm Delete',
+    content: 'Are you sure you want to delete this todo?',
+    okText: 'Yes',
+    okType: 'danger',
+    cancelText: 'No',
+    onOk() {
+      store.removeTodo(id);
+    },
+  });
+}
 </script>
 
 <style scoped>
 .input-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 15px 0;
+  gap: 0.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
-.input, .date-picker {
-  flex: 1 1 auto;
-  min-width: 0;
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+.cell {
+  flex: 3;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1em;
+}
+
+.small-cell-left {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  gap: 1em;
+}
+
+.small-cell-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1em;
+}
+
+.input-text {
+  flex: 4;
+}
+
+.date-picker {
+  flex: 1;
 }
 
 .error-input {
@@ -161,10 +210,10 @@ function handleEditTodo() {
   .input-container {
     flex-direction: column;
   }
-
-  .input, .date-picker {
-    flex: 1 0 100%;
-    min-width: 100%;
+  .list-item {
+    flex-direction: column;
+    gap: 1em;
+    border: 1px solid black;
   }
 }
 
