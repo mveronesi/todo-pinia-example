@@ -4,7 +4,7 @@
       v-model:value="field"
       :class="{'input-text': true, 'error-input': fieldError}"
       placeholder="Search or add a todo"
-      @keyup.enter="handleSearchTodo"
+      @keyup.enter="handleAddTodo"
     />
     <DatePicker 
       class="input date-picker" 
