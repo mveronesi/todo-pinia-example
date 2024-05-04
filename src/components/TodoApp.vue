@@ -14,11 +14,15 @@
       @update:value="handleDateChange" 
       ref="datePicker" 
     />
-    <Button type="primary" @click="handleAddTodo">Add Todo</Button>
-    <Button type="primary" @click="handleSearchTodo">Search Todo</Button>
   </div>
+
   <div v-if="fieldError" class="error">{{ fieldError }}</div>
   <div v-if="dateError" class="error">{{ dateError }}</div>
+
+  <div class="buttons-container">
+    <Button type="primary" class="button" @click="handleSearchTodo">Search Todo</Button>
+    <Button type="primary" class="button" @click="handleAddTodo">Add Todo</Button>
+  </div>
 
   <div class="stats-container">
     <Typography>Active: {{ store.activeTodosCount }}</Typography>
@@ -68,14 +72,14 @@ import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutl
 import type { ITodo } from '@/interfaces';
 
 const field = ref('');
-const date = ref<Dayjs | null>(dayjs());
+const date = ref(dayjs());
 const store = useTodoStore();
-const datePickerRef = ref(null);
+const datePickerRef = ref<any>(null);
 const fieldError = ref('');
 const dateError = ref('');
 const isEditModalVisible = ref(false);
 const editField = ref('');
-const editDate = ref<Dayjs | null>(null);
+const editDate = ref(dayjs());
 let editTodoId: string | null = null;
 
 
@@ -108,7 +112,7 @@ function handleAddTodo() {
   store.addTodo(todo);
 
   field.value = '';
-  datePickerRef.value?.clear()
+  datePickerRef.value?.clear();
   fieldError.value = '';
   dateError.value = '';
 }
@@ -125,19 +129,19 @@ function openEditModal(todo: ITodo) {
 }
 
 function handleDateChange(newDate: string | Dayjs) {
-  date.value = newDate;
+  date.value = typeof newDate === 'string' ? dayjs(newDate) : newDate;
 }
 
 function handleEditTodo() {
   if (!editField.value || !editDate.value || !editTodoId) return;
   const updatedTodo = {
     text: editField.value,
-    date: editDate.value.format('YYYY-MM-DD'),
+    date: editDate.value instanceof dayjs ? editDate.value.format('YYYY-MM-DD') : dayjs(editDate.value).format('YYYY-MM-DD'),
   };
   store.editTodo(editTodoId, updatedTodo);
   isEditModalVisible.value = false;
   editField.value = '';
-  editDate.value = null;
+  editDate.value = dayjs();
   editTodoId = null;
 }
 
@@ -201,6 +205,13 @@ function confirmDelete(id: string) {
   flex: 1;
 }
 
+.buttons-container {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
 .error-input {
   border-color: red;
 }
@@ -211,6 +222,12 @@ function confirmDelete(id: string) {
   margin-top: 5px;
 }
 
+@media (min-width: 600px) {
+  .button {
+  width: 10em; /* adjust this value as needed */
+  }
+}
+
 @media (max-width: 600px) {
   .input-container {
     flex-direction: column;
@@ -219,6 +236,10 @@ function confirmDelete(id: string) {
     flex-direction: column;
     gap: 1em;
     border: 1px solid black;
+  }
+  .buttons-container {
+    flex-direction: column;
+    gap: 1em;
   }
 }
 
