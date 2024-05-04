@@ -17,6 +17,11 @@ export const useTodoStore = defineStore('todo', () => {
     todos.value = response.data;
   }
 
+  async function searchTodos(text: string) {
+    const response = await axios.get(`${BASE_URL}${text}`);
+    todos.value = response.data;
+  }
+
   async function addTodo(todo: ITodo) {
     const response = await axios.post(BASE_URL, todo);
     todos.value.push(response.data);
@@ -67,6 +72,7 @@ export const useTodoStore = defineStore('todo', () => {
 
   return {
     fetchTodos,
+    searchTodos,
     addTodo,
     removeTodo,
     toggleDone,

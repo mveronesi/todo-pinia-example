@@ -3,8 +3,8 @@
     <Input
       v-model:value="field"
       :class="{'input-text': true, 'error-input': fieldError}"
-      placeholder="Type name of todo"
-      @keyup.enter="handleAddTodo"
+      placeholder="Search or add a todo"
+      @keyup.enter="handleSearchTodo"
     />
     <DatePicker 
       class="input date-picker" 
@@ -15,6 +15,7 @@
       ref="datePicker" 
     />
     <Button type="primary" @click="handleAddTodo">Add Todo</Button>
+    <Button type="primary" @click="handleSearchTodo">Search Todo</Button>
   </div>
   <div v-if="fieldError" class="error">{{ fieldError }}</div>
   <div v-if="dateError" class="error">{{ dateError }}</div>
@@ -110,6 +111,10 @@ function handleAddTodo() {
   datePickerRef.value?.clear()
   fieldError.value = '';
   dateError.value = '';
+}
+
+function handleSearchTodo() {
+  store.searchTodos(field.value);
 }
 
 function openEditModal(todo: ITodo) {
